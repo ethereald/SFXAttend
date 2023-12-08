@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="https://sfxattend.000webhostapp.com/sfxicons/icon-150.png">
+    <link rel="icon" sizes="192x192" href="https://sfxattend.000webhostapp.com/sfxicons/icon-192.png"/>
+    <meta data-react-helmet="true" name="apple-mobile-web-app-title" content="SFX Scan"/>
+	<meta data-react-helmet="true" name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <link rel="manifest" href="https://sfxattend.000webhostapp.com/manifest.json">
+
+    <script src="/html5-qrcode.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SFX Attendance Scanner v1.12.3</title>
+    <link rel="stylesheet" href="https://demos.jquerymobile.com/1.4.5/css/themes/default/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="https://demos.jquerymobile.com/1.4.5/_assets/css/jqm-demos.css">
+    <script src="https://demos.jquerymobile.com/1.4.5/js/jquery.js"></script>
+    <!--<script src="https://demos.jquerymobile.com/1.4.5/_assets/js/index.js"></script>-->
+    <script src="https://demos.jquerymobile.com/1.4.5/js/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" href="js/jquery-ui.min.css">
+
+    <script src="js/jquery-ui.min.js"></script>
+    
+    <style>
+        body {
+             -webkit-user-select: none;
+             -webkit-tap-highlight-color: transparent;
+             -webkit-touch-callout: none;
+        }
+        .main-dialog-class .ui-widget-content{background-image:none;background-color:#fff}
+    </style>
+
+    <script>
+		document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Register the service worker if available.
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(function(reg) {
+                console.log('Successfully registered service worker', reg);
+            }).catch(function(err) {
+                console.warn('Error whilst registering service worker', err);
+            });
+        }
+
+        window.addEventListener('online', function(e) {
+            // Resync data with server.
+            console.log("You are online");
+            Page.hideOfflineWarning();
+            Arrivals.loadData();
+        }, false);
+
+        window.addEventListener('offline', function(e) {
+            // Queue up events for server.
+            console.log("You are offline");
+            Page.showOfflineWarning();
+        }, false);
+
+        function docReady(fn) {
+            // see if DOM is already available
+            if (document.readyState === "complete"
+                || document.readyState === "interactive") {
+                // call on next available tick
+                setTimeout(fn, 1);
+            } else {
+                document.addEventListener("DOMContentLoaded", fn);
+            }
+        }
+
+        docReady(function () {
+            var resultContainer = document.getElementById('qr-reader-results');
+            var countResults = 0;
+            function onScanSuccess(decodedText, decodedResult) {
+                html5QrcodeScanner.clear();
+                var decodedInfo = atob(decodedText.substring(9, decodedText.length).split('').reverse().join('')).split(";");                
+                var envelopNum = decodedInfo[0];
+                var lastName = decodedInfo[1];
+                var studentName = decodedInfo[2];
+                $('#Name').text(lastName);
+                $('#EnvelopNum').text(envelopNum);
+
+                $.post( 
+                    "https://docs.google.com/forms/u/0/d/e/1FAIpQLSfYbu19blRX0kAOZZcVmD9-9Cjzrh_W5zyILQ1X8Xkl9MY7cg/formResponse",
+                    { "entry.598350577": envelopNum, "entry.2069741964": studentName },                    
+                    $("#dialog").dialog({
+                        modal: true,
+                        title: "Sign-in Confirmation",
+                        width: 300,
+                        height: 350,
+                        dialogClass: 'main-dialog-class',
+                        open: function (event, ui) {                        
+                            setTimeout(function () {
+                                $("#dialog").dialog("close");
+                                html5QrcodeScanner.render(onScanSuccess);
+                            }, 5000);
+                        }
+                    }) // End .dialog
+                );  // End .post
+            }
+
+            var html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", { fps: 10, qrbox: 500, disableFlip: true });
+            html5QrcodeScanner.render(onScanSuccess);
+        });
+    </script>
+</head>
+
+<body>
+
+    <div data-role="page" data-theme="a">
+
+        <div data-role="header">
+            <h1>SFX Attendance 1.12.3</h1>
+        </div><!-- /header -->
+
+        <div role="main" class="ui-content">
+            <div id="qr-reader"></div>
+            <div id="qr-reader-results"></div>
+        </div><!-- /content -->
+
+        <div data-role="footer">
+            <h4>Copyright &copy; SFX Parish, 2022</h4>
+        </div><!-- /footer -->
+
+    </div><!-- /page -->
+
+    <div id="dialog" style="display: none">
+        Here is your sign-in confirmation: <br/>
+        <hr/>
+        Family last Name:<div id="Name"></div><br/>
+        Envelop Number: <div id="EnvelopNum"></div>
+    </div>
+</html>

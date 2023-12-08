@@ -1,0 +1,42 @@
+{
+  "name": "SFX Attendance Scanner Progressive Web App",
+  "short_name": "SFX Scan",
+  "description": "Progressive Web App that scan SFX attendance.",
+  "icons": [
+    {
+        "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-32.png",
+        "sizes": "32x32",
+        "type": "image/png"
+    },
+    {
+        "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-48.png",
+        "sizes": "48x48",
+        "type": "image/png"
+    },
+    {
+        "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+    },
+    {
+      "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-150.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    },
+    {
+        "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    },
+    {
+    "src": "https://sfxattend.000webhostapp.com/sfxicons/icon-512.png",
+    "sizes": "512x512",
+    "type": "image/png"
+    }
+  ],
+  "start_url": "./scanner.html",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#B12A34",
+  "background_color": "#B12A34"
+}
